@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import FeedbackButtons from './Components/FeedbackButtons';
-import buttons from './buttons.json';
-// import styles from './Statistics.module.css';
+import { Component } from 'react';
+import Statistics from './components/Statistics';
+import FeedbackOptions from './components/FeedbackOptions';
+import Section from './components/Section';
+import Notification from './components/Notification';
 
+class App extends Component {
+  static defaultProps = {};
 
-
-// import './App.css';
-
-class App extends Component{
+  static propTypes = {};
 
   state = {
     good: 0,
@@ -15,43 +15,55 @@ class App extends Component{
     bad: 0,
   };
 
-  addFeedback = (rating) => {
-    this.setState (prevState => ({
-      [rating]: prevState[rating] + 1,
+  incrementFeedback = stateName => {
+    this.setState(prevState => ({
+      [stateName]: prevState[stateName] + 1,
+    }));
+  };
 
-    }))
+  countTotalFeedback = () =>
+    Object.values(this.state).reduce(
+      (total, stateQuantity) => total + stateQuantity,
+      0,
+    );
+
+  countPositiveFeedbackPercentage = () =>
+    this.countTotalFeedback()
+      ? Math.round((this.state.good * 100) / this.countTotalFeedback())
+      : 0;
+
+  render() {
+    const {
+      state,
+      countTotalFeedback,
+      countPositiveFeedbackPercentage,
+      incrementFeedback,
+    } = this;
+
+    return (
+      <>
+        <Section title="Please leave feedback">
+          <FeedbackOptions
+            options={Object.keys(state)}
+            onLeaveFeedback={incrementFeedback}
+          />
+        </Section>
+        <Section title="Statistics">
+          {countTotalFeedback() > 0 ? (
+            <Statistics
+              good={state.good}
+              neutral={state.neutral}
+              bad={state.bad}
+              total={countTotalFeedback()}
+              positivePercentage={countPositiveFeedbackPercentage()}
+            />
+          ) : (
+            <Notification message="No feedback given" />
+          )}
+        </Section>
+      </>
+    );
   }
-render () {
-return (
-  <div>
-    <h2> Please leave feedback </h2> 
-    <div> {buttons.map ((button) => (
-      <button type ="button"
-      key={button.id}
-      onClick={()=>this.addFeedback} >
-          {button.rating}
-       </button>
-    ))
-      }
-    
-    </div>
-
-    <div>
-    <h2> Statistics </h2> 
-      <span>good: {this.state.good}</span>
-      <span>neutral: {this.state.neutral}</span>
-      <span>bad: {this.state.bad}</span>
-      {/* <span>Total: {total}</span> */}
-
-
-    </div>
-
-{/* <FeedbackButtons /> */}
-</div>
-
-
-)
-}
 }
 
 export default App;
